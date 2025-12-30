@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Issue Ration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+  body {
+  min-height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #618286,
+    #54ACBF,
+    #26658C,
+    #023859,
+    #011C40
+  );
+}
+
+</style>
+<body>
+
+<%- include("partials/navbar") %>
+
+<div class="container mt-4">
+
+  <h4 class="fw-bold mb-3">
+    🧾 Issue Ration – <%= user.name %> (<%= user.cardNumber %>)
+  </h4>
+
+  <p class="text-muted"> Family Members: <strong><%= user.members %></strong></p>
+
+  <form method="POST">
+   <div class="table-responsive">
+      <table class="table table-bordered bg-white align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Item</th>
+            <th>Allowed Qty</th>
+            <th>Price / kg</th>
+            <th>Qty Taken</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% items.forEach((item, i) => { 
+               const allowedQty = item.perPersonQty * user.members %>
+            <tr>
+              <td>
+                <%= item.itemName %>
+                <input type="hidden" name="itemName[]" value="<%= item.itemName %>">
+              </td>
+
+              <td>
+                <strong><%= allowedQty %> kg</strong>
+                <div class="text-muted small">
+                  <%= item.perPersonQty %> × <%= user.members %>
+                </div>
+              </td>
+
+              <td>
+                ₹<%= item.pricePerKg %>
+                <input type="hidden" name="price[]" value="<%= item.pricePerKg %>">
+              </td>
+
+              <td style="max-width:120px;">
+                <input type="number" name="quantity[]" class="form-control qty" min="0" max="<%= allowedQty %>" step="0.1" value="0">
+              </td>
+
+              <td class="item-total fw-semibold">₹0</td>
+
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <h5 class="text-end mt-3"> Grand Total: ₹<span id="grandTotal">0</span></h5>
+
+    <div class="text-end mt-3">
+      <button class="btn btn-success"> ✅ Confirm & Issue</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  const qtyInputs = document.querySelectorAll(".qty")
+  const totals = document.querySelectorAll(".item-total")
+  const prices = document.querySelectorAll("input[name='price[]']")
+  const grandTotalEl = document.getElementById("grandTotal")
+
+  function calculate() {
+    
+    let grand = 0
+
+    qtyInputs.forEach((input, i) => {
+      const qty = Number(input.value)
+      const price = Number(prices[i].value)
+      const total = qty * price
+
+      totals[i].innerText = "₹" + total.toFixed(2)
+      grand += total
+    })
+
+    grandTotalEl.innerText = grand.toFixed(2)
+  }
+
+  qtyInputs.forEach(input => {
+    input.addEventListener("input", calculate)
+  })
+</script>
+
+</body>
+</html>

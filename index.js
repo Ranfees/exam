@@ -1,24 +1,28 @@
-const express = require ('express')
+const express = require("express")
+const dotenv = require("dotenv")
+const cookieParser = require("cookie-parser")
+
+dotenv.config()
+
+const connectDB = require("./config/db")
+
 const app = express()
-const port = 3000
-
-app.use(express.urlencoded())
-
-const connectDB=require('./config/db')
-
-
-app.set('view engine','ejs')
-
-app.get('/',(req,res)=>{
-    return res.render('login')
-})
-
-app.post('/',(req,res)=>{
-    return res.render('adminDashboard')
-})
 
 connectDB()
 
-app.listen(port,()=>{
-    console.log('connected')
+app.set("view engine", "ejs")
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
+
+const adminRoutes = require("./routes/adminRoutes")
+const rationRoutes = require("./routes/rationRoutes")
+const auth = require("./middleware/auth")
+
+app.use("/admin", adminRoutes)
+
+app.use("/ration", auth, rationRoutes)
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`)
 })
